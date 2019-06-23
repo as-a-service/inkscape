@@ -10,7 +10,7 @@ Run with `docker run -p 8080:8080 gcr.io/as-a-service-dev/inkscape`
 
 ## Running the server locally
 
-* Build with `docker build . -t pdf`
+* Build with `docker build . -t inkscape`
 * Start with `docker run -p 8080:8080 inkscape`
 * Open in your browser at `http://localhost:8080"/?url=https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg`
 
