@@ -8,15 +8,15 @@ from flask import Flask, after_this_request, render_template, request, send_file
 from subprocess import call
 
 UPLOAD_FOLDER = '/tmp'
-ALLOWED_EXTENSIONS = set(['doc', 'docx', 'xls', 'xlsx'])
+ALLOWED_EXTENSIONS = set(['svg'])
 
 app = Flask(__name__)
 
 
 # Convert using Libre Office
-def convert_file(output_dir, input_file):
-    call('libreoffice --headless --convert-to pdf --outdir %s %s ' %
-         (output_dir, input_file), shell=True)
+def convert_file(input_file_path, output_dir, output_file_path):
+    call('inkscape --file %s  --export-png %s ' %
+         (input_file_path, output_file_path), shell=True)
 
 
 def allowed_file(filename):
@@ -26,11 +26,11 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def api():
+    output_extension = 'png'
+    file_name = 'image'
     work_dir = tempfile.TemporaryDirectory()
-    file_name = 'document'
     input_file_path = os.path.join(work_dir.name, file_name)
-    # Libreoffice is creating files with the same name but .pdf extension
-    output_file_path = os.path.join(work_dir.name, file_name + '.pdf')
+    output_file_path = os.path.join(work_dir.name, file_name + '.' + output_extension)
 
     if request.method == 'POST':
         # check if the post request has the file part
@@ -52,14 +52,14 @@ def api():
             shutil.copyfileobj(response.raw, file)
         del response
 
-    convert_file(work_dir.name, input_file_path)
+    convert_file(input_file_path, work_dir.name, output_file_path)
 
     @after_this_request
     def cleanup(response):
         work_dir.cleanup()
         return response
  
-    return send_file(output_file_path, mimetype='application/pdf')
+    return send_file(output_file_path, mimetype='image/png')
 
 
 if __name__ == "__main__":
